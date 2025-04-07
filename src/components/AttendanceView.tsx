@@ -4,11 +4,27 @@ import '../styles/AttendanceView.css';
 const AttendanceView = () => {
   const [authNumber, setAuthNumber] = useState<string>('');
   const [showAuthView, setShowAuthView] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const generateAuthNumber = () => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    setAuthNumber(randomNum.toString());
-    setShowAuthView(true);
+  const generateAuthNumber = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/verification/generate?phoneNumber=01012345678', {
+        method: 'POST',
+        headers: {
+          'Accept': 'text/plain',
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      const data = await response.text();
+      setAuthNumber(data);
+      setShowAuthView(true);
+    } catch (error) {
+      console.error('인증번호 생성 중 오류 발생:', error);
+      alert('인증번호 생성에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const copyAuthNumber = () => {
@@ -18,8 +34,12 @@ const AttendanceView = () => {
 
   return (
     <div className="attendance-container">
-      <button className="auth-button" onClick={generateAuthNumber}>
-        인증번호 생성
+      <button 
+        className="auth-button" 
+        onClick={generateAuthNumber}
+        disabled={isLoading}
+      >
+        {isLoading ? '생성 중...' : '인증번호 생성'}
       </button>
       
       {showAuthView && (
