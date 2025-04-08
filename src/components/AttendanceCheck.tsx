@@ -144,15 +144,11 @@ const getRandomName = () => {
   return sampleNames[randomIndex];
 };
 
-interface Props {
-  studentId?: string;
-}
+const API_BASE_URL = 'https://c762-2001-2d8-f13a-1bf-652f-83c4-d0ed-a52c.ngrok-free.app';
+// const API_BASE_URL = 'http://localhost:8080';
 
-// const API_BASE_URL = 'https://c762-2001-2d8-f13a-1bf-652f-83c4-d0ed-a52c.ngrok-free.app';
-const API_BASE_URL = 'http://localhost:8080';
-
-const AttendanceCheck: React.FC<Props> = ({ studentId }) => {
-  const [status, setStatus] = React.useState<AttendanceStatus>({
+const AttendanceCheck = () => {
+  const [status] = React.useState<AttendanceStatus>({
     present: 5,
     late: 1,
     absent: 1,
@@ -196,6 +192,7 @@ const AttendanceCheck: React.FC<Props> = ({ studentId }) => {
       console.log('출석체크 성공:', response.data);
       // TODO: 성공 시 상태 업데이트
       alert('출석이 완료되었습니다.');
+      handleNameClick();
     } catch (err) {
       console.error('출석체크 실패:', err);
       setError('출석체크에 실패했습니다. 다시 시도해주세요.');
