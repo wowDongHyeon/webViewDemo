@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 
@@ -29,6 +29,7 @@ const Header = styled.div`
   margin-bottom: 20px;
   
   .back-button {
+    color: #666;
     margin-right: 10px;
     font-size: 20px;
     cursor: pointer;
@@ -37,6 +38,7 @@ const Header = styled.div`
   .title {
     font-size: 18px;
     font-weight: bold;
+    color: #666;
   }
 `;
 
@@ -123,6 +125,7 @@ const StatusGrid = styled.div`
       font-size: 18px;
       font-weight: bold;
       margin-bottom: 5px;
+      color: #666;
     }
     
     .label {
@@ -144,12 +147,12 @@ const getRandomName = () => {
   return sampleNames[randomIndex];
 };
 
-const API_BASE_URL = 'https://c762-2001-2d8-f13a-1bf-652f-83c4-d0ed-a52c.ngrok-free.app';
+const API_BASE_URL = 'https://85ed-2001-2d8-f13a-1bf-652f-83c4-d0ed-a52c.ngrok-free.app';
 // const API_BASE_URL = 'http://localhost:8080';
 
 const AttendanceCheck = () => {
-  const [status] = React.useState<AttendanceStatus>({
-    present: 5,
+  const [status, setStatus] = React.useState<AttendanceStatus>({
+    present: 0,
     late: 1,
     absent: 1,
     pending: 9
@@ -158,6 +161,48 @@ const AttendanceCheck = () => {
   const [studentName, setStudentName] = React.useState(getRandomName());
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const fetchAttendanceCount = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/attendance/count`,
+        {
+          lectureName: 'WebProgramming',
+          classTime: '05'
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('출석 현황 응답:', response.data);
+      
+      if (typeof response.data === 'number') {
+        const newStatus = {
+          present: response.data,
+          late: 1,
+          absent: 1,
+          pending: 9
+        };
+        console.log('새로운 상태:', newStatus);
+        setStatus(newStatus);
+      } else {
+        console.error('예상치 못한 응답 데이터 형식:', response.data);
+      }
+    } catch (err) {
+      console.error('출석 현황 조회 실패:', err);
+    }
+  };
+
+  useEffect(() => {
+    console.log('현재 상태:', status);
+  }, [status]);
+
+  useEffect(() => {
+    fetchAttendanceCount();
+  }, []);
 
   const handleNameClick = () => {
     setStudentName(getRandomName());
@@ -170,9 +215,9 @@ const AttendanceCheck = () => {
     const today = new Date().toISOString().split('T')[0];
     
     const requestData: AttendanceRequest = {
-      lectureName: "세계글로벌경영학의 이해와 기초와 서향동의 바라보는 경제",
+      lectureName: "WebProgramming",
       classroom: "공학관 1관 502호",
-      classTime: "07-08교시 (15:00 ~ 17:00)",
+      classTime: "05",
       date: today,
       status: "출석",
       studentName: studentName
@@ -190,9 +235,9 @@ const AttendanceCheck = () => {
       );
 
       console.log('출석체크 성공:', response.data);
-      // TODO: 성공 시 상태 업데이트
       alert('출석이 완료되었습니다.');
       handleNameClick();
+      fetchAttendanceCount();
     } catch (err) {
       console.error('출석체크 실패:', err);
       setError('출석체크에 실패했습니다. 다시 시도해주세요.');
