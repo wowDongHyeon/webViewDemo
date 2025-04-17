@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface AttendanceStatus {
   present: number;
@@ -16,6 +17,7 @@ interface AttendanceRequest {
   date: string;
   status: string;
   studentName: string;
+  testSeq: number;
 }
 
 const Container = styled.div`
@@ -147,10 +149,12 @@ const getRandomName = () => {
   return sampleNames[randomIndex];
 };
 
-const API_BASE_URL = 'https://85ed-2001-2d8-f13a-1bf-652f-83c4-d0ed-a52c.ngrok-free.app';
-// const API_BASE_URL = 'http://localhost:8080';
+// const API_BASE_URL = ' https://ba4f-2001-2d8-f235-7f77-5465-5772-64a6-d75e.ngrok-free.app';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const AttendanceCheck = () => {
+  const navigate = useNavigate();
   const [status, setStatus] = React.useState<AttendanceStatus>({
     present: 0,
     late: 1,
@@ -209,41 +213,7 @@ const AttendanceCheck = () => {
   };
 
   const handleAttendance = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    const today = new Date().toISOString().split('T')[0];
-    
-    const requestData: AttendanceRequest = {
-      lectureName: "WebProgramming",
-      classroom: "공학관 1관 502호",
-      classTime: "05",
-      date: today,
-      status: "출석",
-      studentName: studentName
-    };
-
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/attendance/check`,
-        requestData,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log('출석체크 성공:', response.data);
-      alert('출석이 완료되었습니다.');
-      handleNameClick();
-      fetchAttendanceCount();
-    } catch (err) {
-      console.error('출석체크 실패:', err);
-      setError('출석체크에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsLoading(false);
-    }
+    navigate('/options');
   };
 
   return (
@@ -305,4 +275,4 @@ const AttendanceCheck = () => {
   );
 };
 
-export default AttendanceCheck; 
+export default AttendanceCheck;  
